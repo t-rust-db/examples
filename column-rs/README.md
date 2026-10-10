@@ -1,6 +1,6 @@
 # column-rs example
 
-A small, runnable tour of [column-rs](https://github.com/iheitlager/column-rs), the
+A small, runnable tour of [column-rs](https://github.com/t-rust-db/tools/tree/main/column-rs), the
 SQL-over-Parquet analytics engine in the t-rust-db family. Two tiny fixture
 tables — `orders` and `customers` — and five queries that show what its SQL
 subset actually supports: a filter, a `GROUP BY` aggregate, `ORDER BY` +
@@ -69,12 +69,12 @@ gizmo	369.99
 
 1. `$COLUMN_RS` — explicit path, if set
 2. `column-rs` on `$PATH` — a globally installed/linked build
-3. `../../column-rs/target/release/column-rs` — i.e. `t-rust-db/column-rs`
-   built in place, the normal case when this `examples` repo is checked out
-   as a sibling of `column-rs` under `t-rust-db/`
+3. `../../tools/target/release/column-rs` — i.e. the `t-rust-db/tools`
+   workspace built in place, the normal case when this `examples` repo is
+   checked out as a sibling of `tools` under `t-rust-db/`
 
 It does not build column-rs for you — build it first if needed:
 
 ```bash
-(cd ../../column-rs && cargo build --release)
+(cd ../../tools && cargo build --release -p column-rs)
 ```

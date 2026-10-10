@@ -9,9 +9,9 @@
 # Resolved in the same order as benchmark/parity/column-rs/run.sh:
 #   1. $COLUMN_RS                                       -- explicit path
 #   2. `column-rs` on $PATH                              -- installed build
-#   3. ../../column-rs/target/release/column-rs          -- t-rust-db/column-rs
+#   3. ../../tools/target/release/column-rs              -- t-rust-db/tools
 #      built in place, the normal case when this examples repo is checked
-#      out as a sibling of column-rs under t-rust-db/
+#      out as a sibling of tools under t-rust-db/
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,13 +22,13 @@ if [ -n "${COLUMN_RS:-}" ]; then
 elif command -v column-rs >/dev/null 2>&1; then
     BIN="$(command -v column-rs)"
 else
-    BIN="$ROOT/../../column-rs/target/release/column-rs"
+    BIN="$ROOT/../../tools/target/release/column-rs"
 fi
 
 if [ ! -x "$BIN" ]; then
     echo "error: no column-rs binary found at '$BIN'" >&2
     echo "  set \$COLUMN_RS to an explicit binary path, or put column-rs on \$PATH," >&2
-    echo "  or build it in place: (cd ../../column-rs && cargo build --release)" >&2
+    echo "  or build it in place: (cd ../../tools && cargo build --release -p column-rs)" >&2
     exit 1
 fi
 
