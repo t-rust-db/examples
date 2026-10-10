@@ -1,6 +1,6 @@
 # sqlite-rs example
 
-A small, runnable tour of [sqlite-rs](https://github.com/t-rust-db/sqlite-rs), the
+A small, runnable tour of [sqlite-rs](https://github.com/t-rust-db/tools/tree/main/sqlite-rs), the
 byte-compatible SQLite clone in the t-rust-db family. A four-table schema --
 `directors`, `movies`, `actors`, and a `movie_cast` junction table -- populated
 with Quentin Tarantino's and the Coen Brothers' filmographies and their lead
@@ -62,12 +62,12 @@ Expected output starts with:
 
 1. `$SQLITE_RS` — explicit path, if set
 2. `sqlite-rs` on `$PATH` — a globally installed/linked build
-3. `../../sqlite-rs/target/release/sqlite-rs` — i.e. `t-rust-db/sqlite-rs`
-   built in place, the normal case when this `examples` repo is checked out
-   as a sibling of `sqlite-rs` under `t-rust-db/`
+3. `../../tools/target/release/sqlite-rs` — i.e. the `t-rust-db/tools`
+   workspace built in place, the normal case when this `examples` repo is
+   checked out as a sibling of `tools` under `t-rust-db/`
 
 It does not build sqlite-rs for you — build it first if needed:
 
 ```bash
-(cd ../../sqlite-rs && cargo build --release --bin sqlite-rs)
+(cd ../../tools && cargo build --release -p sqlite-rs --bin sqlite-rs)
 ```

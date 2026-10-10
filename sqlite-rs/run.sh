@@ -9,9 +9,9 @@
 # Resolved in the same order as ../column-rs/run.sh:
 #   1. $SQLITE_RS                                        -- explicit path
 #   2. `sqlite-rs` on $PATH                               -- installed build
-#   3. ../../sqlite-rs/target/release/sqlite-rs           -- t-rust-db/sqlite-rs
+#   3. ../../tools/target/release/sqlite-rs               -- t-rust-db/tools
 #      built in place, the normal case when this examples repo is checked
-#      out as a sibling of sqlite-rs under t-rust-db/
+#      out as a sibling of tools under t-rust-db/
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,13 +22,13 @@ if [ -n "${SQLITE_RS:-}" ]; then
 elif command -v sqlite-rs >/dev/null 2>&1; then
     BIN="$(command -v sqlite-rs)"
 else
-    BIN="$ROOT/../../sqlite-rs/target/release/sqlite-rs"
+    BIN="$ROOT/../../tools/target/release/sqlite-rs"
 fi
 
 if [ ! -x "$BIN" ]; then
     echo "error: no sqlite-rs binary found at '$BIN'" >&2
     echo "  set \$SQLITE_RS to an explicit binary path, or put sqlite-rs on \$PATH," >&2
-    echo "  or build it in place: (cd ../../sqlite-rs && cargo build --release --bin sqlite-rs)" >&2
+    echo "  or build it in place: (cd ../../tools && cargo build --release -p sqlite-rs --bin sqlite-rs)" >&2
     exit 1
 fi
 
