@@ -28,6 +28,10 @@ in `run.sh`):
 ROWS=2000000 ./run.sh    # timings dominated by the scan, not process start
 ```
 
+Output is coloured on a terminal: passes green, mismatches red, codecs by
+codec, and the faster reader of each timing row green. `NO_COLOR=1` turns
+it off; `FORCE_COLOR=1` keeps it on in a pipe or CI log.
+
 It builds `writer/` (a small program over db-core's writer; db-core is
 expected as a sibling checkout, `../../db-core`), writes the six files
 into `out/`, checks each file's codec with DuckDB's `parquet_metadata`, and
