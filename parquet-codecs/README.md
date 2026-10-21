@@ -87,10 +87,21 @@ duckdb_zstd.parquet           zstd               109.4       23.4
   bytes buy nothing. **The reader costs more:** column-rs scans text
   4-5x slower than DuckDB.
 
-- **Sizes differ by writer, not only by codec.** db-core writes zstd at
-  `ruzstd`'s one implemented level (about zstd level 1) and stores `id`
-  and `ts` PLAIN; DuckDB uses zstd level 3 and delta encodings, so its
-  zstd file is about half the size here.
+- **The zstd gap is the encoder, not the encoding.** Both writers produce
+  the same pages here (PLAIN `id`, `ts` and `note`, dictionaries for the
+  rest; the same uncompressed bytes per column), so the difference is in
+  compression alone. At 200 000 rows:
+
+  | encoder | file |
+  |---|---|
+  | db-core, `ruzstd` `Fastest` | 2.61 MB |
+  | DuckDB, libzstd level 1 | 1.61 MB |
+  | DuckDB, libzstd level 3 (its default) | 1.23 MB |
+  | DuckDB, libzstd level 9 | 1.18 MB |
+
+  `ruzstd`'s fastest level, nominally zstd level 1, writes 1.6x libzstd's
+  level 1, and about 4x on the text column (`note`, 0.9 vs 0.21 MB); the
+  rest is DuckDB's default level 3. Tracked in db-core#692.
 - **Timestamps:** db-core writes `ts` as UTC-adjusted, which DuckDB reads
   as `TIMESTAMP WITH TIME ZONE`; DuckDB's own files hold a plain
   `TIMESTAMP`. The instants are the same, so the timestamp query compares
