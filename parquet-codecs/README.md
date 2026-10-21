@@ -24,8 +24,8 @@ in `run.sh`):
 ## Running
 
 ```bash
-./run.sh            # ROWS=200000
-ROWS=1000000 ./run.sh
+./run.sh                 # ROWS=200000, RUNS=10
+ROWS=2000000 ./run.sh    # timings dominated by the scan, not process start
 ```
 
 It builds `writer/` (a small program over db-core's writer; db-core is
@@ -33,6 +33,12 @@ expected as a sibling checkout, `../../db-core`), writes the six files
 into `out/`, checks each file's codec with DuckDB's `parquet_metadata`, and
 runs every query through column-rs and DuckDB on every file. A reader that
 disagrees with DuckDB on DuckDB's uncompressed file fails the run.
+
+Then it times a **free-text search that scans every record**, a
+`LIKE '%…%'` on `note`, which no statistics can prune, through both readers
+on all six files with [hyperfine](https://github.com/sharkdp/hyperfine)
+(median of `RUNS`; skipped if hyperfine is not on `PATH`). Both readers must
+find the same rows before they are timed.
 
 column-rs is found as in `../column-rs/`: `$COLUMN_RS`, `column-rs` on
 `$PATH`, or `../../tools/target/release/column-rs`.
@@ -51,7 +57,35 @@ duckdb_zstd.parquet           ZSTD             1227144  yes
 ok: 6 files x 5 queries, column-rs and DuckDB agree
 ```
 
+Read timings at `ROWS=2000000` (Apple M-series, warm page cache; process
+start included):
+
+```
+== read timings, median of 10 runs (ms): SELECT count(*) FROM T WHERE note LIKE '%host 42%'
+file                          codec          column-rs     DuckDB
+db_core_uncompressed.parquet  uncompressed        95.3       21.0
+db_core_snappy.parquet        snappy              95.2       21.8
+db_core_zstd.parquet          zstd               102.0       23.5
+duckdb_uncompressed.parquet   uncompressed        86.9       20.9
+duckdb_snappy.parquet         snappy              86.4       21.8
+duckdb_zstd.parquet           zstd                93.9       21.4
+
+== read timings, median of 10 runs (ms): SELECT id, user_name FROM T WHERE note LIKE '%request 1999%' ORDER BY id
+file                          codec          column-rs     DuckDB
+db_core_uncompressed.parquet  uncompressed       110.4       21.9
+db_core_snappy.parquet        snappy             115.7       23.0
+db_core_zstd.parquet          zstd               123.3       24.8
+duckdb_uncompressed.parquet   uncompressed        98.3       22.2
+duckdb_snappy.parquet         snappy              99.1       23.0
+duckdb_zstd.parquet           zstd               109.4       23.4
+```
+
 ## Notes
+
+- **The codec costs little on a full scan.** zstd adds 7-10% for either
+  reader against Snappy or uncompressed, in a warm page cache, where fewer
+  bytes buy nothing. **The reader costs more:** column-rs scans text
+  4-5x slower than DuckDB.
 
 - **Sizes differ by writer, not only by codec.** db-core writes zstd at
   `ruzstd`'s one implemented level (about zstd level 1) and stores `id`
