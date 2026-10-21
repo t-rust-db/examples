@@ -1,0 +1,12 @@
+[package]
+name = "parquet-tiered-writer"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# db-core is checked out as a sibling of this examples repo under t-rust-db/.
+[dependencies]
+db-core = { path = "../../../db-core", default-features = false, features = ["ingest"] }
+
+# Not part of any workspace.
+[workspace]
