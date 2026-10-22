@@ -61,36 +61,43 @@ duckdb_zstd.parquet           ZSTD             1227144  yes
 ok: 6 files x 5 queries, column-rs and DuckDB agree
 ```
 
-Read timings at `ROWS=2000000` (Apple M-series, warm page cache; process
-start included):
+Read timings at `ROWS=2000000` with column-rs on db-core v0.156.0 (Apple
+M-series, warm page cache; process start included):
 
 ```
-== read timings, median of 10 runs (ms): SELECT count(*) FROM T WHERE note LIKE '%host 42%'
+== read timings, median of 10 runs (ms)
+SELECT count(*) FROM T WHERE note LIKE '%host 42%'
 file                          codec          column-rs     DuckDB
-db_core_uncompressed.parquet  uncompressed        95.3       21.0
-db_core_snappy.parquet        snappy              95.2       21.8
-db_core_zstd.parquet          zstd               102.0       23.5
-duckdb_uncompressed.parquet   uncompressed        86.9       20.9
-duckdb_snappy.parquet         snappy              86.4       21.8
-duckdb_zstd.parquet           zstd                93.9       21.4
+db_core_uncompressed.parquet  uncompressed        24.1       21.9
+db_core_snappy.parquet        snappy              25.6       22.7
+db_core_zstd.parquet          zstd                31.4       24.2
+duckdb_uncompressed.parquet   uncompressed        22.5       21.2
+duckdb_snappy.parquet         snappy              23.3       21.2
+duckdb_zstd.parquet           zstd                28.7       22.3
 
-== read timings, median of 10 runs (ms): SELECT id, user_name FROM T WHERE note LIKE '%request 1999%' ORDER BY id
+== read timings, median of 10 runs (ms)
+SELECT id, user_name FROM T WHERE note LIKE '%request 1999%' ORDER BY id
 file                          codec          column-rs     DuckDB
-db_core_uncompressed.parquet  uncompressed       110.4       21.9
-db_core_snappy.parquet        snappy             115.7       23.0
-db_core_zstd.parquet          zstd               123.3       24.8
-duckdb_uncompressed.parquet   uncompressed        98.3       22.2
-duckdb_snappy.parquet         snappy              99.1       23.0
-duckdb_zstd.parquet           zstd               109.4       23.4
+db_core_uncompressed.parquet  uncompressed        39.9       21.8
+db_core_snappy.parquet        snappy              42.7       23.5
+db_core_zstd.parquet          zstd                52.1       24.9
+duckdb_uncompressed.parquet   uncompressed        37.4       21.5
+duckdb_snappy.parquet         snappy              39.5       22.8
+duckdb_zstd.parquet           zstd                48.0       23.8
 ```
+
+Before db-core v0.156.0 column-rs took 86-102 ms on the first search and
+98-123 ms on the second: its `LIKE` copied and backtracked per row
+(db-core#691).
 
 ## Notes
 
-- **The codec costs little on a full scan.** zstd adds 7-10% for either
-  reader against Snappy or uncompressed, in a warm page cache, where fewer
-  bytes buy nothing. **The reader costs more:** column-rs scans text
-  4-5x slower than DuckDB.
-
+- **Text search is on par with DuckDB** since db-core v0.156.0 (the first
+  search). The second spends most of its remaining time decoding
+  `user_name` for the few matching rows, not matching.
+- **zstd decompression is where column-rs still trails:** +30% on the scan
+  against DuckDB's +10%. ruzstd decodes these pages at about 580 MB/s
+  against libzstd's 950+ MB/s (db-core#697).
 - **The zstd gap is the encoder, not the encoding.** Both writers produce
   the same pages here (PLAIN `id`, `ts` and `note`, dictionaries for the
   rest; the same uncompressed bytes per column), so the difference is in

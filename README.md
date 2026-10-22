@@ -48,9 +48,11 @@ by DuckDB with the same queries, and every answer must match; each file
 must record the codec it was written with. It prints the file size per
 writer and codec, then times a **full-scan free-text search** (a
 `LIKE '%…%'` no statistics can prune) per file and per reader with
-hyperfine. Findings so far: zstd costs 7-10% on a warm scan, column-rs scans
-text 4-5x slower than DuckDB (db-core#691), and db-core's zstd files are
-larger than DuckDB's because of the encoder (db-core#692).
+hyperfine. Findings so far: zstd costs 7-10% on a warm scan for DuckDB and
+about 30% for column-rs, whose zstd decoder is slower (db-core#697); since
+db-core v0.156.0 column-rs searches text as fast as DuckDB (db-core#691);
+and db-core's zstd files are larger than DuckDB's because of the encoder
+(db-core#692).
 
 ### [`parquet-tiered/`](parquet-tiered/): a striped table
 
@@ -71,7 +73,7 @@ files and row groups on the sort key.
   `../tools` checkout (`cargo build --release -p column-rs`).
 - The `parquet-*` examples build a small writer against a sibling
   `../db-core` checkout, and need a column-rs built against db-core v0.153.0
-  or later (tools pins v0.155.0). `parquet-codecs` uses
+  or later (tools pins v0.156.0). `parquet-codecs` uses
   [hyperfine](https://github.com/sharkdp/hyperfine) for its timings, and
   skips them without it.
 
