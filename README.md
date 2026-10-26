@@ -13,6 +13,7 @@ a mismatch.
 | [`sqlite-rs/`](sqlite-rs/) | sqlite-rs | A four-table SQLite database, joined |
 | [`parquet-codecs/`](parquet-codecs/) | db-core, column-rs | Parquet codecs across two writers and two readers, with read timings |
 | [`parquet-tiered/`](parquet-tiered/) | db-core, column-rs | A striped (tiered) table written hour by hour and read back |
+| [`parquet-sqlite-join/`](parquet-sqlite-join/) | column-rs | A Parquet event table joined to SQLite lookup tables |
 
 ## The examples
 
@@ -63,10 +64,21 @@ reads the table directory and DuckDB reads exactly the files the manifest
 lists; their answers must agree, including a `session_id` lookup that skips
 files and row groups on the sort key.
 
+### [`parquet-sqlite-join/`](parquet-sqlite-join/): Parquet joined to SQLite
+
+An event table in Parquet and its lookup tables (event definitions,
+channels) in a SQLite file, loaded side by side in column-rs and joined in
+db-core's cross-mode engine: inner, `GROUP BY` a lookup column, a star
+join, and `LEFT JOIN`. A filter on a lookup table skips the Parquet row
+groups whose keys can't match, and `EXPLAIN QUERY PLAN` shows how many were
+kept. This one runs through column-rs only; each query carries the check
+its output must pass. Needs column-rs 0.28.0 or later.
+
 ## Requirements
 
 - **DuckDB** on `PATH` for the Parquet examples (fixtures and the reference
-  reader), and the real **`sqlite3`** for `sqlite-rs/`.
+  reader), and the real **`sqlite3`** for `sqlite-rs/` and
+  `parquet-sqlite-join/`.
 - **column-rs** and **sqlite-rs** from
   [t-rust-db/tools](https://github.com/t-rust-db/tools), found as
   `$COLUMN_RS` / `$SQLITE_RS`, on `PATH`, or built in place in a sibling
