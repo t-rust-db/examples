@@ -41,7 +41,7 @@ each file's row groups, rows and codec (all must be ZSTD), then runs every
 query through column-rs (`column-rs -c "…" out/events`) and through DuckDB
 (`read_parquet` of the manifest's files) and compares the answers.
 
-column-rs is found as in `../column-rs/`: `$COLUMN_RS`, `column-rs` on
-`$PATH`, or `../../tools/target/release/column-rs`. It must be built
+column-rs is found as in `../column-rs/`: `$COLUMN_RS`, a sibling
+`../../tools` checkout (built first), or `column-rs` on `$PATH`. It must be built
 against db-core v0.153.0 or later: tables with a sort key write manifest
 version 4, which older readers refuse.

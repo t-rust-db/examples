@@ -10,8 +10,8 @@
 #
 #   ./run.sh
 #
-# column-rs is resolved as in ../column-rs/run.sh: $COLUMN_RS, then
-# `column-rs` on $PATH, then ../../tools/target/release/column-rs. It must
+# column-rs is resolved as in ../column-rs/run.sh: $COLUMN_RS, then a
+# sibling tools checkout (built first), then `column-rs` on $PATH. It must
 # be built against db-core v0.153.0 or later, which reads manifest version
 # 4 (sort-key ranges, #589).
 set -euo pipefail
@@ -20,14 +20,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 TABLE="out/events"
 
-if [ -n "${COLUMN_RS:-}" ]; then
-    BIN="$COLUMN_RS"
-elif command -v column-rs >/dev/null 2>&1; then
-    BIN="$(command -v column-rs)"
-else
-    BIN="$ROOT/../../tools/target/release/column-rs"
-fi
-[ -x "$BIN" ] || { echo "error: no column-rs binary at '$BIN' (build it: cd ../../tools && cargo build --release -p column-rs)" >&2; exit 1; }
+. "$ROOT/../lib/tool.sh"
+BIN="$(find_tool column-rs column-rs COLUMN_RS)"
 command -v duckdb >/dev/null 2>&1 || { echo "error: duckdb not found on PATH" >&2; exit 1; }
 
 echo "building the db-core writer..."

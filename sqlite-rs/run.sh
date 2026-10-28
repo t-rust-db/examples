@@ -6,31 +6,19 @@
 #
 # ## Which sqlite-rs binary?
 #
-# Resolved in the same order as ../column-rs/run.sh:
-#   1. $SQLITE_RS                                        -- explicit path
-#   2. `sqlite-rs` on $PATH                               -- installed build
-#   3. ../../tools/target/release/sqlite-rs               -- t-rust-db/tools
-#      built in place, the normal case when this examples repo is checked
-#      out as a sibling of tools under t-rust-db/
+# Resolved newest first, as in ../column-rs/run.sh:
+#   1. $$SQLITE_RS                                       -- explicit path
+#   2. ../../tools/target/release/sqlite-rs, built first when t-rust-db/tools
+#      is checked out next to this examples repo (only what changed)
+#   3. `sqlite-rs` on $PATH                              -- installed build
+# (../lib/tool.sh); it prints the version it uses.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-if [ -n "${SQLITE_RS:-}" ]; then
-    BIN="$SQLITE_RS"
-elif command -v sqlite-rs >/dev/null 2>&1; then
-    BIN="$(command -v sqlite-rs)"
-else
-    BIN="$ROOT/../../tools/target/release/sqlite-rs"
-fi
-
-if [ ! -x "$BIN" ]; then
-    echo "error: no sqlite-rs binary found at '$BIN'" >&2
-    echo "  set \$SQLITE_RS to an explicit binary path, or put sqlite-rs on \$PATH," >&2
-    echo "  or build it in place: (cd ../../tools && cargo build --release -p sqlite-rs --bin sqlite-rs)" >&2
-    exit 1
-fi
+. "$ROOT/../lib/tool.sh"
+BIN="$(find_tool sqlite-rs sqlite-rs SQLITE_RS)"
 
 FIXTURE="fixture/movies.db"
 if [ ! -f "$FIXTURE" ]; then
