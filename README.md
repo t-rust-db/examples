@@ -81,11 +81,13 @@ its output must pass. Needs column-rs 0.28.0 or later.
   `parquet-sqlite-join/`.
 - **column-rs** and **sqlite-rs** from
   [t-rust-db/tools](https://github.com/t-rust-db/tools), found as
-  `$COLUMN_RS` / `$SQLITE_RS`, on `PATH`, or built in place in a sibling
-  `../tools` checkout (`cargo build --release -p column-rs`).
+  `$COLUMN_RS` / `$SQLITE_RS`, else built from a sibling `../tools`
+  checkout (each `run.sh` runs `cargo build --release` there first, so it
+  never runs a stale build), else on `PATH`. `lib/tool.sh` does this and
+  prints the version it uses.
 - The `parquet-*` examples build a small writer against a sibling
   `../db-core` checkout, and need a column-rs built against db-core v0.153.0
-  or later (tools pins v0.156.0). `parquet-codecs` uses
+  or later (tools pins v0.189.0). `parquet-codecs` uses
   [hyperfine](https://github.com/sharkdp/hyperfine) for its timings, and
   skips them without it.
 

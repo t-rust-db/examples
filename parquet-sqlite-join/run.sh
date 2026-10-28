@@ -9,26 +9,15 @@
 # must contain (tabs read as spaces), and `-- refused` on a query column-rs
 # must refuse. Exits non-zero if any check fails.
 #
-# Binary resolution: $COLUMN_RS > column-rs on PATH > ../../tools/target/release/column-rs
+# Binary resolution (../lib/tool.sh): $COLUMN_RS > a sibling tools checkout,
+# built first > column-rs on PATH
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-if [ -n "${COLUMN_RS:-}" ]; then
-    BIN="$COLUMN_RS"
-elif command -v column-rs >/dev/null 2>&1; then
-    BIN="$(command -v column-rs)"
-else
-    BIN="$ROOT/../../tools/target/release/column-rs"
-fi
-
-if [ ! -x "$BIN" ]; then
-    echo "error: no column-rs binary found at '$BIN'" >&2
-    echo "  set \$COLUMN_RS to an explicit binary path, or put column-rs on \$PATH," >&2
-    echo "  or build it in place: (cd ../../tools && cargo build --release -p column-rs)" >&2
-    exit 1
-fi
+. "$ROOT/../lib/tool.sh"
+BIN="$(find_tool column-rs column-rs COLUMN_RS)"
 
 FIXTURE="fixture"
 if [ ! -f "$FIXTURE/events.parquet" ] || [ ! -f "$FIXTURE/lookups.db" ]; then

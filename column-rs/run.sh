@@ -6,31 +6,19 @@
 #
 # ## Which column-rs binary?
 #
-# Resolved in the same order as benchmark/parity/column-rs/run.sh:
-#   1. $COLUMN_RS                                       -- explicit path
-#   2. `column-rs` on $PATH                              -- installed build
-#   3. ../../tools/target/release/column-rs              -- t-rust-db/tools
-#      built in place, the normal case when this examples repo is checked
-#      out as a sibling of tools under t-rust-db/
+# Resolved newest first, needing 0.32.0 or later (LIST columns):
+#   1. $$COLUMN_RS                                       -- explicit path
+#   2. ../../tools/target/release/column-rs, built first when t-rust-db/tools
+#      is checked out next to this examples repo (only what changed)
+#   3. `column-rs` on $PATH                              -- installed build
+# (../lib/tool.sh); it prints the version it uses.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-if [ -n "${COLUMN_RS:-}" ]; then
-    BIN="$COLUMN_RS"
-elif command -v column-rs >/dev/null 2>&1; then
-    BIN="$(command -v column-rs)"
-else
-    BIN="$ROOT/../../tools/target/release/column-rs"
-fi
-
-if [ ! -x "$BIN" ]; then
-    echo "error: no column-rs binary found at '$BIN'" >&2
-    echo "  set \$COLUMN_RS to an explicit binary path, or put column-rs on \$PATH," >&2
-    echo "  or build it in place: (cd ../../tools && cargo build --release -p column-rs)" >&2
-    exit 1
-fi
+. "$ROOT/../lib/tool.sh"
+BIN="$(find_tool column-rs column-rs COLUMN_RS 0.32.0)"
 
 FIXTURE="fixture"
 if [ ! -f "$FIXTURE/orders.parquet" ] || [ ! -f "$FIXTURE/customers.parquet" ]; then

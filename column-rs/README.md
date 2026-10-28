@@ -99,17 +99,15 @@ If your fixture predates the `tags` column, regenerate it with
 
 ### Finding the column-rs binary
 
-`run.sh` resolves the binary in this order, same as
-`benchmark/parity/column-rs/run.sh`:
+`run.sh` resolves the binary in this order (`../lib/tool.sh`), and prints
+the version it uses:
 
-1. `$COLUMN_RS` — explicit path, if set
-2. `column-rs` on `$PATH` — a globally installed/linked build
-3. `../../tools/target/release/column-rs` — i.e. the `t-rust-db/tools`
-   workspace built in place, the normal case when this `examples` repo is
-   checked out as a sibling of `tools` under `t-rust-db/`
+1. `$$COLUMN_RS` — explicit path, if set
+2. `../../tools/target/release/column-rs`, built first with `cargo build
+   --release` when the `t-rust-db/tools` workspace is checked out as a
+   sibling of this `examples` repo under `t-rust-db/` (cargo rebuilds only
+   what changed, so this is quick once built)
+3. `column-rs` on `$PATH` — a globally installed/linked build
 
-It does not build column-rs for you — build it first if needed:
-
-```bash
-(cd ../../tools && cargo build --release -p column-rs)
-```
+It stops if the binary is older than column-rs 0.32.0, which the list query
+needs.

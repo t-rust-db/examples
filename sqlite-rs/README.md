@@ -58,16 +58,12 @@ Expected output starts with:
 
 ### Finding the sqlite-rs binary
 
-`run.sh` resolves the binary in this order, same as `../column-rs/run.sh`:
+`run.sh` resolves the binary in this order (`../lib/tool.sh`), and prints
+the version it uses:
 
-1. `$SQLITE_RS` — explicit path, if set
-2. `sqlite-rs` on `$PATH` — a globally installed/linked build
-3. `../../tools/target/release/sqlite-rs` — i.e. the `t-rust-db/tools`
-   workspace built in place, the normal case when this `examples` repo is
-   checked out as a sibling of `tools` under `t-rust-db/`
-
-It does not build sqlite-rs for you — build it first if needed:
-
-```bash
-(cd ../../tools && cargo build --release -p sqlite-rs --bin sqlite-rs)
-```
+1. `$$SQLITE_RS` — explicit path, if set
+2. `../../tools/target/release/sqlite-rs`, built first with `cargo build
+   --release` when the `t-rust-db/tools` workspace is checked out as a
+   sibling of this `examples` repo under `t-rust-db/` (cargo rebuilds only
+   what changed, so this is quick once built)
+3. `sqlite-rs` on `$PATH` — a globally installed/linked build

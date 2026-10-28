@@ -14,8 +14,8 @@
 #   ./run.sh            (ROWS=200000, RUNS=10 by default)
 #   ROWS=2000000 ./run.sh   for timings dominated by the scan, not startup
 #
-# column-rs is resolved as in ../column-rs/run.sh: $COLUMN_RS, then
-# `column-rs` on $PATH, then ../../tools/target/release/column-rs.
+# column-rs is resolved as in ../column-rs/run.sh: $COLUMN_RS, then a
+# sibling tools checkout (built first), then `column-rs` on $PATH.
 #
 # Output is coloured on a terminal (or with FORCE_COLOR=1); NO_COLOR=1, or
 # a pipe, keeps it plain.
@@ -48,14 +48,8 @@ ROWS="${ROWS:-200000}"
 RUNS="${RUNS:-10}"
 OUT="out"
 
-if [ -n "${COLUMN_RS:-}" ]; then
-    BIN="$COLUMN_RS"
-elif command -v column-rs >/dev/null 2>&1; then
-    BIN="$(command -v column-rs)"
-else
-    BIN="$ROOT/../../tools/target/release/column-rs"
-fi
-[ -x "$BIN" ] || die "no column-rs binary at '$BIN' (build it: cd ../../tools && cargo build --release -p column-rs)"
+. "$ROOT/../lib/tool.sh"
+BIN="$(find_tool column-rs column-rs COLUMN_RS)"
 command -v duckdb >/dev/null 2>&1 || die "duckdb not found on PATH"
 
 step "building the db-core writer"

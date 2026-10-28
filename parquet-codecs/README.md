@@ -44,8 +44,8 @@ on all six files with [hyperfine](https://github.com/sharkdp/hyperfine)
 (median of `RUNS`; skipped if hyperfine is not on `PATH`). Both readers must
 find the same rows before they are timed.
 
-column-rs is found as in `../column-rs/`: `$COLUMN_RS`, `column-rs` on
-`$PATH`, or `../../tools/target/release/column-rs`.
+column-rs is found as in `../column-rs/`: `$COLUMN_RS`, a sibling
+`../../tools` checkout (built first), or `column-rs` on `$PATH`.
 
 ## Output
 
