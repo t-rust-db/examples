@@ -20,9 +20,10 @@ a mismatch.
 ### [`column-rs/`](column-rs/): SQL over Parquet
 
 Two small Parquet tables, `orders` and `customers`, generated with DuckDB,
-and five queries that show what column-rs's deliberately small SQL subset
+and seven queries that show what column-rs's deliberately small SQL subset
 supports: a `WHERE` filter, a `GROUP BY` aggregate, `ORDER BY` + `LIMIT`, an
-equi-join on qualified columns, and a `ROW_NUMBER()` window function. Its
+equi-join on qualified columns, a `ROW_NUMBER()` window function, a
+`LIST<VARCHAR>` column, and `UNNEST` of that list. Its
 README also explains how every example finds the `column-rs` binary.
 
 ### [`column-rs-threat/`](column-rs-threat/): threat detection
@@ -89,7 +90,7 @@ its output must pass. Needs column-rs 0.28.0 or later.
   binary resolves to.
 - The `parquet-*` examples build a small writer against a sibling
   `../db-core` checkout, and need a column-rs built against db-core v0.153.0
-  or later (tools pins v0.189.0). `parquet-codecs` uses
+  or later (tools pins v0.192.0). `parquet-codecs` uses
   [hyperfine](https://github.com/sharkdp/hyperfine) for its timings, and
   skips them without it.
 

@@ -6,7 +6,7 @@
 #
 # ## Which column-rs binary?
 #
-# Resolved newest first, needing 0.32.0 or later (LIST columns):
+# Resolved newest first, needing 0.33.0 or later (UNNEST):
 #   1. $$COLUMN_RS                                       -- explicit path
 #   2. ../../tools/target/release/column-rs, built first when t-rust-db/tools
 #      is checked out next to this examples repo (only what changed)
@@ -18,7 +18,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
 . "$ROOT/../lib/tool.sh"
-BIN="$(find_tool column-rs column-rs COLUMN_RS 0.32.0)"
+BIN="$(find_tool column-rs column-rs COLUMN_RS 0.33.0)"
 
 FIXTURE="fixture"
 if [ ! -f "$FIXTURE/orders.parquet" ] || [ ! -f "$FIXTURE/customers.parquet" ]; then

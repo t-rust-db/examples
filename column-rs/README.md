@@ -38,6 +38,7 @@ Regenerate any time — the `.parquet` files aren't committed.
 | `queries/join.sql` | `INNER JOIN`, qualified columns, no aliases |
 | `queries/window.sql` | `ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)` |
 | `queries/list.sql` | A `LIST<VARCHAR>` column (see [Lists](#lists)) |
+| `queries/unnest.sql` | `UNNEST` of a list, one row per element (see [Lists](#lists)) |
 
 ## Running
 
@@ -90,9 +91,29 @@ A NULL list (orders 4 and 10) is not the same as an empty one (`[]`), and
 an element can be NULL or repeat. The query runs unchanged in DuckDB over the
 same file and returns the same rows; DuckDB displays a list as
 `[gift, express]`, and `to_json(tags)` gives column-rs's JSON form. In `--pipe` mode the column's type is
-`VARCHAR[]` and each value is a JSON array. A list can be selected and
-tested with `IS NULL` / `IS NOT NULL`; taking it apart per element waits
-for `UNNEST` (db-core#802).
+`VARCHAR[]` and each value is a JSON array.
+
+`UNNEST` takes a list apart: one row per element (db-core 0.192, column-rs
+0.33). `FROM orders, UNNEST(tags) AS t(tag)`, `CROSS JOIN UNNEST(tags)`
+and `SELECT UNNEST(tags)` all work, and the element column can be grouped:
+
+```bash
+column-rs -c "SELECT tag, count(*) FROM orders, UNNEST(tags) AS t(tag) GROUP BY tag ORDER BY tag" \
+    fixture/orders.parquet fixture/customers.parquet
+```
+
+```
+tag	COUNT(*)
+express	4
+gift	4
+wholesale	2
+NULL	1
+```
+
+It counts uses, not orders: order 7's `["gift","express","gift"]` adds
+two to `gift`. An empty or NULL list gives no rows, a NULL element gives a
+NULL `tag`. DuckDB returns the same rows (its header is `count_star()`).
+`UNNEST(string_split(product, ' '))` splits a string the same way.
 
 If your fixture predates the `tags` column, regenerate it with
 `./fixture/generate.sh`.
@@ -109,5 +130,5 @@ the version it uses:
    what changed, so this is quick once built)
 3. `column-rs` on `$PATH` — a globally installed/linked build
 
-It stops if the binary is older than column-rs 0.32.0, which the list query
-needs.
+It stops if the binary is older than column-rs 0.33.0, which the `UNNEST`
+query needs.
