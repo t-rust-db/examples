@@ -84,7 +84,9 @@ its output must pass. Needs column-rs 0.28.0 or later.
   `$COLUMN_RS` / `$SQLITE_RS`, else built from a sibling `../tools`
   checkout (each `run.sh` runs `cargo build --release` there first, so it
   never runs a stale build), else on `PATH`. `lib/tool.sh` does this and
-  prints the version it uses.
+  reports each step and the version it uses; run it directly
+  (`lib/tool.sh`) to see which binary and version every tools workspace
+  binary resolves to.
 - The `parquet-*` examples build a small writer against a sibling
   `../db-core` checkout, and need a column-rs built against db-core v0.153.0
   or later (tools pins v0.189.0). `parquet-codecs` uses
