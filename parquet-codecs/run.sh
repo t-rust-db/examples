@@ -140,7 +140,8 @@ fi
 # The median of $RUNS runs of one command, in milliseconds.
 median_ms() {
     hyperfine -N -w 2 -r "$RUNS" --export-json "$OUT/t.json" "$1" >/dev/null 2>&1
-    python3 -c 'import json,sys; print("%.1f" % (json.load(open(sys.argv[1]))["results"][0]["median"] * 1e3))' "$OUT/t.json"
+    # hyperfine 2.x nests the statistics under summary.time_wall_clock; 1.x has results[0].median.
+    python3 -c 'import json,sys; r = json.load(open(sys.argv[1]))["results"][0]; m = r["summary"]["time_wall_clock"]["median"] if "summary" in r else r["median"]; print("%.1f" % (m * 1e3))' "$OUT/t.json"
 }
 for search in "${SEARCHES[@]}"; do
     header "read timings, median of $RUNS runs (ms)"
